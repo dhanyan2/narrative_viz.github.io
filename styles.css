@@ -1,0 +1,223 @@
+body {
+  font-family: "Arial", sans-serif;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header p {
+  font-size: 1.2em;
+  opacity: 0.9;
+}
+
+.narrative-container {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+.story-panel {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-height: 450px;
+  overflow-y: scroll;
+}
+
+.viz-container {
+  flex: 2;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  max-height: 600px;
+  overflow-y: scroll;
+}
+
+.step {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.step:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(5px);
+}
+
+.step.active {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateX(10px);
+}
+
+.step h3 {
+  margin-top: 0;
+  color: #ffd700;
+  font-size: 1.3em;
+}
+
+.step p {
+  margin-bottom: 0;
+  line-height: 1.6;
+}
+
+.controls {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.btn {
+  background: linear-gradient(45deg, #ff6b6b, #feca57);
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  margin: 0 10px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+svg {
+  display: block;
+  margin: 0 auto;
+}
+
+.axis {
+  color: #333;
+}
+
+.axis text {
+  font-size: 12px;
+  fill: #666;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #ddd;
+  shape-rendering: crispEdges;
+}
+
+.grid line {
+  stroke: #e0e0e0;
+  stroke-dasharray: 2, 2;
+}
+
+.grid path {
+  stroke-width: 0;
+}
+
+.legend {
+  font-size: 14px;
+}
+
+.tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  pointer-events: none;
+  font-size: 12px;
+  z-index: 1000;
+}
+
+.bar {
+  transition: opacity 0.3s ease;
+}
+
+.bar:hover {
+  opacity: 1 !important;
+  stroke-width: 3px !important;
+}
+
+.bar-label {
+  font-weight: bold;
+  pointer-events: none;
+}
+
+.chart-title {
+  font-weight: bold;
+  pointer-events: none;
+}
+.sepal-chart .axis text,
+.petal-chart .axis text {
+  font-size: 11px;
+  fill: #333 !important;
+  font-weight: 500;
+}
+
+.sepal-chart .axis path,
+.sepal-chart .axis line,
+.petal-chart .axis path,
+.petal-chart .axis line {
+  fill: none;
+  stroke: #333 !important;
+  stroke-width: 1.5px;
+  shape-rendering: crispEdges;
+}
+
+.bar-label {
+  fill: #333 !important;
+  font-weight: bold;
+  pointer-events: none;
+}
+
+.y-axis-label {
+  fill: #333 !important;
+  font-weight: bold;
+}
+
+.chart-title {
+  fill: #333 !important;
+  font-weight: bold;
+  pointer-events: none;
+}
+.viz-container text {
+  fill: #333 !important;
+}
+
+.viz-container .axis text {
+  fill: #333 !important;
+}
