@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iris Dataset - Interactive Slideshow</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🌸 The Iris Dataset Story</h1>
+        <p>
+          The famous iris flower dataset, which is the backbone of machine
+          learning research and algorithms
+        </p>
+        <div class="controls">
+          <button class="btn" id="prevBtn">← Previous</button>
+          <button class="btn" id="nextBtn">Next →</button>
+        </div>
+      </div>
+
+      <div class="narrative-container">
+        <div class="story-panel">
+          <div class="step active" data-step="0">
+            <h3>🌱 Introduction</h3>
+            <p>
+              Welcome to the famous Iris dataset! This collection contains
+              measurements of 150 iris flowers across three species. Each flower
+              was measured for petal and sepal dimensions.
+            </p>
+          </div>
+
+          <div class="step" data-step="1">
+            <h3>📊 The Complete Dataset</h3>
+            <p>
+              Here we see all 150 iris flowers plotted by sepal length and
+              width. Notice how they form distinct clusters - this is our first
+              hint that different species might have different characteristics.
+            </p>
+          </div>
+
+          <div class="step" data-step="2">
+            <h3>🔍 Species Revealed</h3>
+            <p>
+              Now we reveal the species! Setosa (red) forms a clear cluster,
+              while Versicolor (green) and Virginica (blue) show some overlap.
+              This is the classic pattern that makes iris classification
+              interesting.
+            </p>
+          </div>
+
+          <div class="step" data-step="3">
+            <h3>📏 Petal Perspective</h3>
+            <p>
+              Switching to petal measurements reveals even clearer separation!
+              Petal length and width provide better discrimination between
+              species, especially separating Setosa from the others.
+            </p>
+          </div>
+
+          <div class="step" data-step="4">
+            <h3>🎯 Key Insights</h3>
+            <p>
+              The iris dataset teaches us about natural variation within species
+              and the power of multiple measurements. It remains a cornerstone
+              example in machine learning and statistics.
+            </p>
+          </div>
+          <div class="step" data-step="5">
+            <h3>📊 Average Sepal/Petal Measurements</h3>
+            <p>
+              Let's examine the mean values for sepal and petal lengths! This
+              bar chart shows the mean and median values for sepal and petal
+              lengths across the three species. Notice how petal length shows
+              greater variation between species than sepal length. We can come
+              to a conclusion about Setosa and Virginica's measurements.
+            </p>
+          </div>
+          <div class="step" data-step="6">
+            <h3>📊 Median Sepal/Petal Measurements</h3>
+            <p>
+              Now let's look at the median values! Medians are less affected by
+              outliers than means, giving us a different perspective on the
+              typical flower measurements. Notice how the median values compare
+              to the averages we just saw. Setosa and Virginica also show
+              consistency in their measurements here as well.
+            </p>
+          </div>
+        </div>
+
+        <div class="viz-container">
+          <div id="visualization"></div>
+          <div class="tooltip" id="tooltip" style="display: none"></div>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-annotation/2.0.0/d3-annotation.min.js"></script>
+  </body>
+</html>
