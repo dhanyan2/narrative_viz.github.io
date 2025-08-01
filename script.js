@@ -25,6 +25,8 @@ async function init() {
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom);
 
+  addArrowMarker();
+
   const g = svg
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
@@ -150,7 +152,7 @@ async function init() {
     g.selectAll(".welcome-text").remove();
     g.selectAll(".welcome-subtext").remove();
     g.selectAll(".cluster-annotation").remove();
-
+    g.selectAll(".safe-annotation").remove();
     g.selectAll(".bar").remove();
     g.selectAll(".sepal-bar").remove();
     g.selectAll(".petal-bar").remove();
@@ -390,6 +392,11 @@ async function init() {
       .duration(600)
       .delay((d, i) => i * 200 + 1500)
       .style("opacity", 1);
+
+    setTimeout(() => {
+      addSafeAnnotation("Setosa separated!", 80, 30, 500);
+      addSafeAnnotation("Overlap zone", 375, 375, 800);
+    }, 2500);
   }
 
   function showPetalView() {
@@ -496,6 +503,11 @@ async function init() {
       .text((d) => d.charAt(0).toUpperCase() + d.slice(1))
       .style("font-size", "14px")
       .style("fill", "#333");
+
+    setTimeout(() => {
+      addSafeAnnotation("Clearer separation!", 200, 20, 400);
+      addSafeAnnotation("Distinct cluster", 150, 400, 1000);
+    }, 3000);
   }
 
   function showInsights() {
@@ -1211,5 +1223,56 @@ async function init() {
 
   function hideTooltip() {
     tooltip.style("display", "none");
+  }
+
+  function addArrowMarker() {
+    svg
+      .append("defs")
+      .append("marker")
+      .attr("id", "arrowhead")
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 8)
+      .attr("refY", 0)
+      .attr("markerWidth", 6)
+      .attr("markerHeight", 6)
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M0,-5L10,0L0,5")
+      .style("fill", "#e74c3c");
+  }
+
+  function addSafeAnnotation(text, x, y, delay = 0) {
+    const annotation = g
+      .append("g")
+      .attr("class", "safe-annotation")
+      .style("opacity", 0);
+
+    const textWidth = text.length * 7;
+    const padding = 8;
+
+    annotation
+      .append("rect")
+      .attr("x", x - textWidth / 2 - padding)
+      .attr("y", y - 12 - padding)
+      .attr("width", textWidth + padding * 2)
+      .attr("height", 24)
+      .attr("rx", 4)
+      .style("fill", "rgba(255, 255, 255, 0.95)")
+      .style("stroke", "#333")
+      .style("stroke-width", 1.5)
+      .style("pointer-events", "none");
+
+    annotation
+      .append("text")
+      .attr("x", x)
+      .attr("y", y)
+      .attr("text-anchor", "middle")
+      .style("font-size", "12px")
+      .style("font-weight", "bold")
+      .style("fill", "#333")
+      .style("pointer-events", "none")
+      .text(text);
+
+    annotation.transition().duration(600).delay(delay).style("opacity", 1);
   }
 }

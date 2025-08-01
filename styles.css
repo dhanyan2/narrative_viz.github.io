@@ -221,3 +221,7 @@ svg {
 .viz-container .axis text {
   fill: #333 !important;
 }
+
+.safe-annotation {
+  pointer-events: none;
+}
