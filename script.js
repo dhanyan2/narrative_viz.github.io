@@ -238,6 +238,10 @@ async function init() {
         filterState.isFiltering = filterState.hiddenSpecies.size > 0;
         updateDotsVisibility();
         updateFilterControls();
+        g.selectAll(".range-slider")
+          .style("pointer-events", filterState.isFiltering ? "none" : "all")
+          .style("opacity", filterState.isFiltering ? 0.3 : 1);
+        toggleTooltips(!filterState.isFiltering);
       });
 
       legendContainer
@@ -311,6 +315,11 @@ async function init() {
     g.selectAll(".legend-item").style("opacity", 1);
     updateDotsVisibility();
     g.selectAll(".filter-controls").remove();
+
+    g.selectAll(".range-slider")
+      .style("pointer-events", "all")
+      .style("opacity", 1);
+    toggleTooltips(true);
   }
 
   function showIntroduction() {
@@ -1566,6 +1575,16 @@ async function init() {
     tooltip.style("display", "none");
   }
 
+  function toggleTooltips(enabled) {
+    if (enabled) {
+      g.selectAll(".dot")
+        .on("mouseover", showTooltip)
+        .on("mouseout", hideTooltip);
+    } else {
+      g.selectAll(".dot").on("mouseover", null).on("mouseout", null);
+    }
+  }
+
   function addRangeSlider(
     gElement,
     data,
@@ -1703,19 +1722,19 @@ async function init() {
 
     resetBtn
       .append("rect")
-      .attr("width", 50)
+      .attr("width", 60)
       .attr("height", 18)
       .attr("rx", 3)
-      .style("fill", "#666")
+      .style("fill", "#ff6b6b")
       .style("opacity", 0.8);
     resetBtn
       .append("text")
-      .attr("x", 25)
+      .attr("x", 30)
       .attr("y", 12)
       .attr("text-anchor", "middle")
       .style("font-size", "10px")
       .style("fill", "white")
-      .text("Reset");
+      .text("Reset Slider");
 
     function filterDots() {
       gElement.selectAll(".dot").style("opacity", (d) => {
@@ -1736,6 +1755,10 @@ async function init() {
       xHandles.attr("cx", (d, i) => xSliderScale(xRange[i]));
       yHandles.attr("cx", (d, i) => ySliderScale(yRange[i]));
       gElement.selectAll(".dot").style("opacity", 0.8);
+      g.selectAll(".legend-item")
+        .style("pointer-events", "all")
+        .style("opacity", 1);
+      toggleTooltips(true);
     }
   }
 }
