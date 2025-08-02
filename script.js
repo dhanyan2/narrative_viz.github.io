@@ -180,6 +180,7 @@ async function init() {
     g.selectAll(".species-label").remove();
     g.selectAll(".reference-dot").remove();
     g.selectAll(".mystery-dot").remove();
+    g.selectAll(".range-slider").remove();
     if (currentStep === 0) {
       xAxis.selectAll("*").remove();
       yAxis.selectAll("*").remove();
@@ -244,10 +245,10 @@ async function init() {
         .attr("class", "filter-instruction")
         .attr("x", 0)
         .attr("y", -15)
-        .style("font-size", "13px")
+        .style("font-size", "10px")
         .style("fill", "#666")
-        .style("font-style", "italic")
-        .text("CLICK TO FILTER");
+        .style("font-style", "bold")
+        .text("click to disable");
     }
 
     return legendItems;
@@ -544,6 +545,17 @@ async function init() {
         .delay(500)
         .style("opacity", 1);
     }, 2500);
+
+    setTimeout(() => {
+      addRangeSlider(
+        g,
+        irisData,
+        (d) => d.sepalLength,
+        (d) => d.sepalWidth,
+        "Sepal Length",
+        "Sepal Width"
+      );
+    }, 2000);
   }
 
   function showPetalView() {
@@ -667,6 +679,17 @@ async function init() {
         .delay(400)
         .style("opacity", 1);
     }, 3000);
+
+    setTimeout(() => {
+      addRangeSlider(
+        g,
+        irisData,
+        (d) => d.sepalLength,
+        (d) => d.sepalWidth,
+        "Sepal Length",
+        "Sepal Width"
+      );
+    }, 2000);
   }
 
   function showInsights() {
@@ -736,6 +759,17 @@ async function init() {
         }, index * 600);
       });
     }, 1000);
+
+    setTimeout(() => {
+      addRangeSlider(
+        g,
+        irisData,
+        (d) => d.sepalLength,
+        (d) => d.sepalWidth,
+        "Sepal Length",
+        "Sepal Width"
+      );
+    }, 2000);
   }
 
   function showMeanStatistics() {
@@ -1530,5 +1564,178 @@ async function init() {
 
   function hideTooltip() {
     tooltip.style("display", "none");
+  }
+
+  function addRangeSlider(
+    gElement,
+    data,
+    xAccessor,
+    yAccessor,
+    xLabel,
+    yLabel
+  ) {
+    const sliderGroup = gElement
+      .append("g")
+      .attr("class", "range-slider")
+      .attr("transform", `translate(${width + 15}, 120)`);
+
+    // X-axis range slider
+    const xExtent = d3.extent(data, xAccessor);
+    const xSliderScale = d3.scaleLinear().domain(xExtent).range([0, 80]);
+    let xRange = [...xExtent];
+
+    const xSlider = sliderGroup.append("g").attr("class", "x-slider");
+    xSlider
+      .append("text")
+      .attr("y", -5)
+      .style("font-size", "11px")
+      .style("fill", "#333")
+      .text(xLabel);
+
+    xSlider
+      .append("line")
+      .attr("x1", 0)
+      .attr("x2", 80)
+      .attr("y1", 8)
+      .attr("y2", 8)
+      .style("stroke", "#ddd")
+      .style("stroke-width", 4);
+
+    const xHandles = xSlider
+      .selectAll(".x-handle")
+      .data([0, 1])
+      .enter()
+      .append("circle")
+      .attr("class", "x-handle")
+      .attr("r", 5)
+      .attr("cy", 8)
+      .attr("cx", (d, i) => xSliderScale(xRange[i]))
+      .style("fill", "#ff6b6b")
+      .style("cursor", "pointer")
+      .call(
+        d3.drag().on("drag", function (event, d) {
+          const newVal = xSliderScale.invert(
+            Math.max(0, Math.min(80, event.x))
+          );
+          xRange[d] = newVal;
+          if (d === 0 && xRange[0] > xRange[1]) xRange[0] = xRange[1];
+          if (d === 1 && xRange[1] < xRange[0]) xRange[1] = xRange[0];
+          d3.select(this).attr("cx", xSliderScale(xRange[d]));
+          filterDots();
+        })
+      )
+      .on("mouseover", function (event, d) {
+        tooltip
+          .style("display", "block")
+          .style("left", event.pageX + 10 + "px")
+          .style("top", event.pageY - 10 + "px")
+          .html(`${xLabel}: ${xRange[d].toFixed(1)}`);
+      })
+      .on("mouseout", function () {
+        tooltip.style("display", "none");
+      });
+
+    // Y-axis range slider
+    const yExtent = d3.extent(data, yAccessor);
+    const ySliderScale = d3.scaleLinear().domain(yExtent).range([0, 80]);
+    let yRange = [...yExtent];
+
+    const ySlider = sliderGroup
+      .append("g")
+      .attr("class", "y-slider")
+      .attr("transform", "translate(0, 40)");
+    ySlider
+      .append("text")
+      .attr("y", -5)
+      .style("font-size", "11px")
+      .style("fill", "#333")
+      .text(yLabel);
+
+    ySlider
+      .append("line")
+      .attr("x1", 0)
+      .attr("x2", 80)
+      .attr("y1", 8)
+      .attr("y2", 8)
+      .style("stroke", "#ddd")
+      .style("stroke-width", 4);
+
+    const yHandles = ySlider
+      .selectAll(".y-handle")
+      .data([0, 1])
+      .enter()
+      .append("circle")
+      .attr("class", "y-handle")
+      .attr("r", 5)
+      .attr("cy", 8)
+      .attr("cx", (d, i) => ySliderScale(yRange[i]))
+      .style("fill", "#2ecc71")
+      .style("cursor", "pointer")
+      .call(
+        d3.drag().on("drag", function (event, d) {
+          const newVal = ySliderScale.invert(
+            Math.max(0, Math.min(80, event.x))
+          );
+          yRange[d] = newVal;
+          if (d === 0 && yRange[0] > yRange[1]) yRange[0] = yRange[1];
+          if (d === 1 && yRange[1] < yRange[0]) yRange[1] = yRange[0];
+          d3.select(this).attr("cx", ySliderScale(yRange[d]));
+          filterDots();
+        })
+      )
+      .on("mouseover", function (event, d) {
+        tooltip
+          .style("display", "block")
+          .style("left", event.pageX + 10 + "px")
+          .style("top", event.pageY - 10 + "px")
+          .html(`${yLabel}: ${yRange[d].toFixed(1)}`);
+      })
+      .on("mouseout", function () {
+        tooltip.style("display", "none");
+      });
+
+    // Reset button
+    const resetBtn = sliderGroup
+      .append("g")
+      .attr("transform", "translate(0, 75)")
+      .style("cursor", "pointer")
+      .on("click", resetFilters);
+
+    resetBtn
+      .append("rect")
+      .attr("width", 50)
+      .attr("height", 18)
+      .attr("rx", 3)
+      .style("fill", "#666")
+      .style("opacity", 0.8);
+    resetBtn
+      .append("text")
+      .attr("x", 25)
+      .attr("y", 12)
+      .attr("text-anchor", "middle")
+      .style("font-size", "10px")
+      .style("fill", "white")
+      .text("Reset");
+
+    function filterDots() {
+      gElement.selectAll(".dot").style("opacity", (d) => {
+        const x = xAccessor(d),
+          y = yAccessor(d);
+        return x >= xRange[0] &&
+          x <= xRange[1] &&
+          y >= yRange[0] &&
+          y <= yRange[1]
+          ? 0.8
+          : 0.1;
+      });
+    }
+
+    function resetFilters() {
+      xRange = [...xExtent];
+      yRange = [...yExtent];
+      xHandles.attr("cx", (d, i) => xSliderScale(xRange[i]));
+      yHandles.attr("cx", (d, i) => ySliderScale(yRange[i]));
+      gElement.selectAll(".dot").style("opacity", 0.8);
+    }
   }
 }
