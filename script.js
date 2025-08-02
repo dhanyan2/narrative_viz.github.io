@@ -169,6 +169,7 @@ async function init() {
     g.selectAll(".sepal-chart").remove();
     g.selectAll(".petal-chart").remove();
     g.selectAll(".y-axis-label").remove();
+    g.selectAll(".filter-controls").remove();
     if (currentStep === 0) {
       xAxis.selectAll("*").remove();
       yAxis.selectAll("*").remove();
