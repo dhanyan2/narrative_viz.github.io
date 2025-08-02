@@ -315,7 +315,7 @@ async function init() {
       .style("font-size", "24px")
       .style("fill", "#333")
       .style("font-weight", "bold")
-      .text("🌸 Welcome to the Iris Dataset!");
+      .text("🌸 How 150 Flowers Changed AI");
 
     const subText = g
       .append("text")
@@ -330,61 +330,57 @@ async function init() {
       .append("tspan")
       .attr("x", xStart)
       .attr("dy", 0)
-      .text("The Iris dataset is one of the most well-known datasets");
+      .text("What looks like random variation in nature actually contains");
 
     subText
       .append("tspan")
       .attr("x", xStart)
       .attr("dy", "1.2em")
-      .text("used in machine learning and data analysis today! It was");
+      .text("precise mathematical signatures. The Iris dataset reveals");
 
     subText
       .append("tspan")
       .attr("x", xStart)
       .attr("dy", "1.2em")
-      .text("first introduced by Ronald A. Fisher in 1936 when");
+      .text("how three nearly identical flower species maintain distinct");
 
     subText
       .append("tspan")
       .attr("x", xStart)
       .attr("dy", "1.2em")
-      .text("biologists at that time had questions about whether species");
+      .text("'fingerprints' in their measurements, a discovery that");
 
     subText
       .append("tspan")
       .attr("x", xStart)
       .attr("dy", "1.2em")
-      .text("could be classified based on physical characteristics.");
+      .text("taught us to find order in apparent chaos and became the");
 
     subText
       .append("tspan")
       .attr("x", xStart)
       .attr("dy", "1.2em")
-      .text("He developed a method called linear discriminant analysis");
+      .text("foundation for every recommendation system, medical diagnosis");
 
     subText
       .append("tspan")
       .attr("x", xStart)
       .attr("dy", "1.2em")
-      .text("to show that species could be classified by statistical");
+      .text(
+        "tool and AI classifier we use today. Developed by British scientist"
+      );
 
     subText
       .append("tspan")
       .attr("x", xStart)
       .attr("dy", "1.2em")
-      .text("measurements. There are 150 samples of the iris flower");
+      .text("Robert Fisher in 1936, this humble dataset of 150 samples became");
 
     subText
       .append("tspan")
       .attr("x", xStart)
       .attr("dy", "1.2em")
-      .text("divided into 3 species-- setosa, virginica, and versicolor.");
-
-    subText
-      .append("tspan")
-      .attr("x", xStart)
-      .attr("dy", "1.2em")
-      .text("Click Next or Previous to view the entire slideshow.");
+      .text("the backbone of modern machine learning classification models.");
   }
 
   function showAllData() {
