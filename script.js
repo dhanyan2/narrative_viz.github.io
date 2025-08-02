@@ -98,6 +98,7 @@ async function init() {
   const stepFunctions = [
     showIntroduction,
     showAllData,
+    showClassificationChallenge,
     revealSpecies,
     showPetalView,
     showInsights,
@@ -170,6 +171,15 @@ async function init() {
     g.selectAll(".petal-chart").remove();
     g.selectAll(".y-axis-label").remove();
     g.selectAll(".filter-controls").remove();
+    g.selectAll(".filter-instruction").remove();
+    g.selectAll(".challenge-instructions").remove();
+    g.selectAll(".challenge-instruction").remove();
+    g.selectAll(".challenge-subtitle").remove();
+    g.selectAll(".challenge-counter").remove();
+    g.selectAll(".success-message").remove();
+    g.selectAll(".species-label").remove();
+    g.selectAll(".reference-dot").remove();
+    g.selectAll(".mystery-dot").remove();
     if (currentStep === 0) {
       xAxis.selectAll("*").remove();
       yAxis.selectAll("*").remove();
@@ -1336,6 +1346,173 @@ async function init() {
     // Clear main axis labels since we're using custom layout
     xLabel.text("");
     yLabel.text("");
+  }
+
+  function showClassificationChallenge() {
+    // Set up petal dimensions (same as complete dataset scene)
+    xScale.domain(d3.extent(irisData, (d) => d.sepalLength)).nice();
+    yScale.domain(d3.extent(irisData, (d) => d.sepalWidth)).nice();
+
+    // Update axes
+    xAxis.call(d3.axisBottom(xScale));
+    yAxis.call(d3.axisLeft(yScale));
+
+    // Add grid
+    xGrid.call(d3.axisBottom(xScale).tickSize(-height).tickFormat(""));
+    yGrid.call(d3.axisLeft(yScale).tickSize(-width).tickFormat(""));
+
+    // Update labels
+    xLabel.text("Sepal Length (cm)");
+    yLabel.text("Sepal Width (cm)");
+
+    // Show reference data in light gray (all flowers)
+    g.selectAll(".reference-dot")
+      .data(irisData)
+      .enter()
+      .append("circle")
+      .attr("class", "reference-dot")
+      .attr("r", 4)
+      .attr("cx", (d) => xScale(d.sepalLength))
+      .attr("cy", (d) => yScale(d.sepalWidth))
+      .style("fill", "#ddd")
+      .style("stroke", "#bbb")
+      .style("opacity", 0.6);
+
+    // Create random mystery flowers with guaranteed variety
+    const getRandomSample = (arr, count) => {
+      const shuffled = [...arr].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    };
+
+    const mysteryFlowers = [
+      ...getRandomSample(
+        irisData.filter((d) => d.species === "setosa"),
+        2
+      ),
+      ...getRandomSample(
+        irisData.filter((d) => d.species === "versicolor"),
+        2
+      ),
+      ...getRandomSample(
+        irisData.filter((d) => d.species === "virginica"),
+        2
+      ),
+    ].map((d, i) => ({ ...d, id: i, revealed: false }));
+
+    // Add mystery dots
+    const mysteryDots = g
+      .selectAll(".mystery-dot")
+      .data(mysteryFlowers)
+      .enter()
+      .append("circle")
+      .attr("class", "mystery-dot")
+      .attr("r", 10)
+      .attr("cx", (d) => xScale(d.sepalLength))
+      .attr("cy", (d) => yScale(d.sepalWidth))
+      .style("fill", "#FFD700")
+      .style("stroke", "#333")
+      .style("stroke-width", 3)
+      .style("cursor", "pointer")
+      .style("opacity", 0)
+      .on("click", function (event, d) {
+        if (!d.revealed) {
+          d.revealed = true;
+          d3.select(this)
+            .transition()
+            .duration(500)
+            .style("fill", colorScale(d.species))
+            .style("stroke", "#fff")
+            .attr("r", 12);
+
+          // Show species label
+          g.append("text")
+            .attr("class", "species-label")
+            .attr("x", xScale(d.sepalLength))
+            .attr("y", yScale(d.sepalWidth) - 20)
+            .attr("text-anchor", "middle")
+            .style("font-size", "12px")
+            .style("font-weight", "bold")
+            .style("fill", colorScale(d.species))
+            .style("opacity", 0)
+            .text(d.species.charAt(0).toUpperCase() + d.species.slice(1))
+            .transition()
+            .duration(300)
+            .style("opacity", 1);
+
+          // Check if all revealed
+          checkAllRevealed(mysteryFlowers);
+        }
+      })
+      .on("mouseover", function (event, d) {
+        if (!d.revealed) {
+          tooltip
+            .style("display", "block")
+            .style("left", event.pageX + 10 + "px")
+            .style("top", event.pageY - 10 + "px")
+            .html(`<strong>Mystery Flower</strong><br>
+                 Sepal: ${d.sepalLength} × ${d.sepalWidth} cm<br>
+                 <em>Click to reveal species!</em>`);
+        }
+      })
+      .on("mouseout", hideTooltip);
+
+    // Animate mystery dots entrance
+    mysteryDots
+      .transition()
+      .duration(600)
+      .delay((d, i) => i * 200 + 800)
+      .style("opacity", 1)
+      .attr("r", 10);
+
+    // Add instruction text
+    const instructionText = g
+      .append("text")
+      .attr("class", "challenge-instruction")
+      .attr("x", width / 2)
+      .attr("y", -10)
+      .attr("text-anchor", "middle")
+      .style("font-size", "13px")
+      .style("font-weight", "bold")
+      .style("fill", "#333")
+      .style("opacity", 0)
+      .text("🎯 Can you identify the species? Click the gold dots!");
+
+    instructionText.transition().duration(800).delay(1500).style("opacity", 1);
+
+    // Add counter
+    const counter = g
+      .append("text")
+      .attr("class", "challenge-counter")
+      .attr("x", width - 100)
+      .attr("y", 30)
+      .style("font-size", "16px")
+      .style("font-weight", "bold")
+      .style("fill", "#666")
+      .text("Revealed: 0/6");
+
+    function checkAllRevealed(flowers) {
+      const revealedCount = flowers.filter((f) => f.revealed).length;
+      counter.text(`Revealed: ${revealedCount}/6`);
+
+      if (revealedCount === flowers.length) {
+        // All revealed - show success message
+        setTimeout(() => {
+          g.append("text")
+            .attr("class", "success-message")
+            .attr("x", width / 2)
+            .attr("y", height + 40)
+            .attr("text-anchor", "middle")
+            .style("font-size", "13px")
+            .style("font-weight", "bold")
+            .style("fill", "#2ecc71")
+            .style("opacity", 0)
+            .text("🌟 Great job! Notice the patterns?")
+            .transition()
+            .duration(800)
+            .style("opacity", 1);
+        }, 500);
+      }
+    }
   }
 
   function showTooltip(event, d) {
