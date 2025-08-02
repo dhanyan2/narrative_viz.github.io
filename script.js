@@ -4,6 +4,10 @@ let sortingState = {
   sepalSort: "species",
   petalSort: "species",
 };
+let filterState = {
+  hiddenSpecies: new Set(),
+  isFiltering: false,
+};
 async function init() {
   // Iris dataset
   const irisData = await d3.csv("iris.csv", (d) => ({
@@ -144,6 +148,9 @@ async function init() {
       });
     }
 
+    filterState.hiddenSpecies.clear();
+    filterState.isFiltering = false;
+
     // Clear all elements before each transition to prevent overlap
     g.selectAll(".dot").remove();
     g.selectAll(".legend-item").remove();
@@ -175,6 +182,123 @@ async function init() {
     }
     // Run step function
     stepFunctions[currentStep]();
+  }
+
+  function createInteractiveLegend(
+    legendContainer,
+    legendData,
+    hasScatterPlot = false
+  ) {
+    const legendItems = legendContainer
+      .selectAll(".legend-item")
+      .data(legendData)
+      .enter()
+      .append("g")
+      .attr("class", "legend-item")
+      .attr("transform", (d, i) => `translate(0, ${i * 25})`)
+      .style("cursor", hasScatterPlot ? "pointer" : "default");
+
+    legendItems
+      .append("circle")
+      .attr("r", 6)
+      .style("fill", (d) => colorScale(d))
+      .style("stroke", "#fff")
+      .style("stroke-width", 2);
+
+    legendItems
+      .append("text")
+      .attr("x", 15)
+      .attr("y", 5)
+      .text((d) => d.charAt(0).toUpperCase() + d.slice(1))
+      .style("font-size", "14px")
+      .style("fill", "#333");
+
+    if (hasScatterPlot) {
+      legendItems.on("click", function (event, d) {
+        if (filterState.hiddenSpecies.has(d)) {
+          filterState.hiddenSpecies.delete(d);
+          d3.select(this).style("opacity", 1);
+        } else {
+          filterState.hiddenSpecies.add(d);
+          d3.select(this).style("opacity", 0.3);
+        }
+
+        filterState.isFiltering = filterState.hiddenSpecies.size > 0;
+        updateDotsVisibility();
+        updateFilterControls();
+      });
+
+      legendContainer
+        .append("text")
+        .attr("class", "filter-instruction")
+        .attr("x", 0)
+        .attr("y", -15)
+        .style("font-size", "13px")
+        .style("fill", "#666")
+        .style("font-style", "italic")
+        .text("CLICK TO FILTER");
+    }
+
+    return legendItems;
+  }
+
+  function updateDotsVisibility() {
+    g.selectAll(".dot")
+      .transition()
+      .duration(300)
+      .style("opacity", function (d) {
+        return filterState.hiddenSpecies.has(d.species) ? 0.1 : 0.8;
+      })
+      .attr("r", function (d) {
+        return filterState.hiddenSpecies.has(d.species) ? 3 : 6;
+      });
+  }
+
+  function createFilterControls() {
+    if (!filterState.isFiltering) return;
+
+    const controlsGroup = g
+      .append("g")
+      .attr("class", "filter-controls")
+      .attr("transform", `translate(${width - 120}, ${height - 30})`);
+
+    const resetButton = controlsGroup
+      .append("g")
+      .style("cursor", "pointer")
+      .on("click", resetFilters);
+
+    resetButton
+      .append("rect")
+      .attr("width", 80)
+      .attr("height", 25)
+      .attr("rx", 4)
+      .style("fill", "#ff6b6b")
+      .style("stroke", "#fff")
+      .style("stroke-width", 1);
+
+    resetButton
+      .append("text")
+      .attr("x", 40)
+      .attr("y", 17)
+      .attr("text-anchor", "middle")
+      .style("font-size", "12px")
+      .style("fill", "white")
+      .style("font-weight", "bold")
+      .text("Reset Filter");
+  }
+
+  function updateFilterControls() {
+    g.selectAll(".filter-controls").remove();
+    createFilterControls();
+  }
+
+  function resetFilters() {
+    filterState.hiddenSpecies.clear();
+    filterState.isFiltering = false;
+
+    g.selectAll(".legend-item").style("opacity", 1);
+    updateDotsVisibility();
+    g.selectAll(".filter-controls").remove();
   }
 
   function showIntroduction() {
@@ -363,27 +487,7 @@ async function init() {
 
     // Add legend with staggered entrance
     const legendData = ["setosa", "versicolor", "virginica"];
-    const legendItems = legend
-      .selectAll(".legend-item")
-      .data(legendData)
-      .enter()
-      .append("g")
-      .attr("class", "legend-item")
-      .attr("transform", (d, i) => `translate(0, ${i * 25})`)
-      .style("opacity", 0);
-
-    legendItems
-      .append("circle")
-      .attr("r", 6)
-      .style("fill", (d) => colorScale(d));
-
-    legendItems
-      .append("text")
-      .attr("x", 15)
-      .attr("y", 5)
-      .text((d) => d.charAt(0).toUpperCase() + d.slice(1))
-      .style("font-size", "14px")
-      .style("fill", "#333");
+    const legendItems = createInteractiveLegend(legend, legendData, true);
 
     // Animate legend items
     legendItems
@@ -519,26 +623,7 @@ async function init() {
 
     // Add legend
     const legendData = ["setosa", "versicolor", "virginica"];
-    const legendItems = legend
-      .selectAll(".legend-item")
-      .data(legendData)
-      .enter()
-      .append("g")
-      .attr("class", "legend-item")
-      .attr("transform", (d, i) => `translate(0, ${i * 25})`);
-
-    legendItems
-      .append("circle")
-      .attr("r", 6)
-      .style("fill", (d) => colorScale(d));
-
-    legendItems
-      .append("text")
-      .attr("x", 15)
-      .attr("y", 5)
-      .text((d) => d.charAt(0).toUpperCase() + d.slice(1))
-      .style("font-size", "14px")
-      .style("fill", "#333");
+    createInteractiveLegend(legend, legendData, true);
 
     setTimeout(() => {
       const annotations = [
@@ -625,26 +710,7 @@ async function init() {
     // Add legend
     // Add interactive legend with click-to-focus
     const legendData = ["setosa", "versicolor", "virginica"];
-    const legendItems = legend
-      .selectAll(".legend-item")
-      .data(legendData)
-      .enter()
-      .append("g")
-      .attr("class", "legend-item")
-      .attr("transform", (d, i) => `translate(0, ${i * 25})`);
-
-    legendItems
-      .append("circle")
-      .attr("r", 6)
-      .style("fill", (d) => colorScale(d));
-
-    legendItems
-      .append("text")
-      .attr("x", 15)
-      .attr("y", 5)
-      .text((d) => d.charAt(0).toUpperCase() + d.slice(1))
-      .style("font-size", "14px")
-      .style("fill", "#333");
+    createInteractiveLegend(legend, legendData, true);
 
     // Add subtle cluster highlighting
     setTimeout(() => {
