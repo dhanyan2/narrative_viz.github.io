@@ -153,9 +153,14 @@ async function init() {
     filterState.hiddenSpecies.clear();
     filterState.isFiltering = false;
 
+    g.selectAll(".legend-item")
+      .style("pointer-events", "all")
+      .style("opacity", 1);
+
     // Clear all elements before each transition to prevent overlap
     g.selectAll(".dot").remove();
     g.selectAll(".legend-item").remove();
+    legend.selectAll("*").style("pointer-events", "all").style("opacity", 1);
     g.selectAll(".welcome-text").remove();
     g.selectAll(".welcome-subtext").remove();
     g.selectAll(".cluster-annotation").remove();
@@ -280,7 +285,7 @@ async function init() {
     const controlsGroup = g
       .append("g")
       .attr("class", "filter-controls")
-      .attr("transform", `translate(${width - 120}, ${height - 30})`);
+      .attr("transform", `translate(${width + 20}, 95)`);
 
     const resetButton = controlsGroup
       .append("g")
@@ -289,19 +294,19 @@ async function init() {
 
     resetButton
       .append("rect")
-      .attr("width", 80)
-      .attr("height", 25)
-      .attr("rx", 4)
+      .attr("width", 60)
+      .attr("height", 18)
+      .attr("rx", 3)
       .style("fill", "#ff6b6b")
       .style("stroke", "#fff")
       .style("stroke-width", 1);
 
     resetButton
       .append("text")
-      .attr("x", 40)
-      .attr("y", 17)
+      .attr("x", 30)
+      .attr("y", 12)
       .attr("text-anchor", "middle")
-      .style("font-size", "12px")
+      .style("font-size", "10px")
       .style("fill", "white")
       .style("font-weight", "bold")
       .text("Reset Filter");
@@ -1691,7 +1696,7 @@ async function init() {
     const sliderGroup = gElement
       .append("g")
       .attr("class", "range-slider")
-      .attr("transform", `translate(${width + 15}, 120)`);
+      .attr("transform", `translate(${width + 15}, 140)`);
 
     // X-axis range slider
     const xExtent = d3.extent(data, xAccessor);
@@ -1842,6 +1847,9 @@ async function init() {
           ? 0.8
           : 0.1;
       });
+      g.selectAll(".legend-item")
+        .style("pointer-events", "none")
+        .style("opacity", 0.5);
     }
 
     function resetFilters() {
