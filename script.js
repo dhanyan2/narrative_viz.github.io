@@ -104,6 +104,7 @@ async function init() {
     showInsights,
     showMeanStatistics,
     showMedianStatistics,
+    showConclusion,
   ];
 
   // Initialize
@@ -181,6 +182,9 @@ async function init() {
     g.selectAll(".reference-dot").remove();
     g.selectAll(".mystery-dot").remove();
     g.selectAll(".range-slider").remove();
+    g.selectAll(".conclusion-title").remove();
+    g.selectAll(".conclusion-text").remove();
+    g.selectAll(".conclusion-impact").remove();
     if (currentStep === 0) {
       xAxis.selectAll("*").remove();
       yAxis.selectAll("*").remove();
@@ -1583,6 +1587,97 @@ async function init() {
     } else {
       g.selectAll(".dot").on("mouseover", null).on("mouseout", null);
     }
+  }
+  function showConclusion() {
+    // Clear axes and create conclusion layout
+    xAxis.selectAll("*").remove();
+    yAxis.selectAll("*").remove();
+    xGrid.selectAll("*").remove();
+    yGrid.selectAll("*").remove();
+    xLabel.text("");
+    yLabel.text("");
+
+    // Main conclusion title
+    g.append("text")
+      .attr("class", "conclusion-title")
+      .attr("x", width / 2)
+      .attr("y", 80)
+      .attr("text-anchor", "middle")
+      .style("font-size", "28px")
+      .style("font-weight", "bold")
+      .style("fill", "#333")
+      .style("opacity", 0)
+      .text("The Legacy of 150 Flowers")
+      .transition()
+      .duration(800)
+      .style("opacity", 1);
+
+    // Conclusion text
+    const conclusionText = g
+      .append("text")
+      .attr("class", "conclusion-text")
+      .attr("x", width / 2)
+      .attr("y", 150)
+      .attr("text-anchor", "middle")
+      .style("font-size", "16px")
+      .style("fill", "#555")
+      .style("opacity", 0);
+
+    conclusionText
+      .append("tspan")
+      .attr("x", width / 2)
+      .attr("dy", 0)
+      .text("From a simple 1936 botanical study to the foundation");
+
+    conclusionText
+      .append("tspan")
+      .attr("x", width / 2)
+      .attr("dy", "1.5em")
+      .text("of modern AI - Fisher's iris dataset proved that");
+
+    conclusionText
+      .append("tspan")
+      .attr("x", width / 2)
+      .attr("dy", "1.5em")
+      .text("nature's patterns could be mathematically decoded.");
+
+    conclusionText
+      .append("tspan")
+      .attr("x", width / 2)
+      .attr("dy", "2em")
+      .text("Today, every recommendation, every medical diagnosis,");
+
+    conclusionText
+      .append("tspan")
+      .attr("x", width / 2)
+      .attr("dy", "1.5em")
+      .text("every AI classification traces back to these");
+
+    conclusionText
+      .append("tspan")
+      .attr("x", width / 2)
+      .attr("dy", "1.5em")
+      .style("font-weight", "bold")
+      .style("fill", "#667eea")
+      .text("150 humble flowers.");
+
+    conclusionText.transition().duration(1000).delay(800).style("opacity", 1);
+
+    // Final impact line
+    g.append("text")
+      .attr("class", "conclusion-impact")
+      .attr("x", width / 2)
+      .attr("y", height - 40)
+      .attr("text-anchor", "middle")
+      .style("font-size", "18px")
+      .style("font-weight", "bold")
+      .style("fill", "#2ecc71")
+      .style("opacity", 0)
+      .text("Sometimes the smallest datasets yield the biggest insights.")
+      .transition()
+      .duration(800)
+      .delay(2500)
+      .style("opacity", 1);
   }
 
   function addRangeSlider(
