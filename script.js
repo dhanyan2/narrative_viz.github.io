@@ -187,6 +187,7 @@ async function init() {
     g.selectAll(".reference-dot").remove();
     g.selectAll(".mystery-dot").remove();
     g.selectAll(".range-slider").remove();
+    g.selectAll(".stats-slider").remove();
     g.selectAll(".conclusion-title").remove();
     g.selectAll(".conclusion-text").remove();
     g.selectAll(".conclusion-impact").remove();
@@ -1093,6 +1094,11 @@ async function init() {
     // Clear main axis labels since we're using custom layout
     xLabel.text("");
     yLabel.text("");
+
+    // Add interactive slider for filtering
+    setTimeout(() => {
+      addStatisticsSlider(g, irisData, sepalStats, petalStats, "mean");
+    }, 2000);
   }
 
   function showMedianStatistics() {
@@ -1398,6 +1404,11 @@ async function init() {
     // Clear main axis labels since we're using custom layout
     xLabel.text("");
     yLabel.text("");
+
+    // Add interactive slider for filtering
+    setTimeout(() => {
+      addStatisticsSlider(g, irisData, sepalStats, petalStats, "median");
+    }, 2000);
   }
 
   function showClassificationChallenge() {
@@ -1862,6 +1873,293 @@ async function init() {
         .style("pointer-events", "all")
         .style("opacity", 1);
       toggleTooltips(true);
+    }
+  }
+
+  function addStatisticsSlider(
+    gElement,
+    data,
+    originalSepalStats,
+    originalPetalStats,
+    statType
+  ) {
+    const sliderGroup = gElement
+      .append("g")
+      .attr("class", "stats-slider")
+      .attr("transform", `translate(${width + 15}, 140)`);
+
+    // Get measurement extents for slider ranges
+    const sepalExtent = d3.extent(data, (d) => d.sepalLength);
+    const petalExtent = d3.extent(data, (d) => d.petalLength);
+
+    let sepalRange = [...sepalExtent];
+    let petalRange = [...petalExtent];
+    let isSliderActive = false;
+
+    // Sepal slider
+    const sepalSliderScale = d3
+      .scaleLinear()
+      .domain(sepalExtent)
+      .range([0, 80]);
+
+    const sepalSlider = sliderGroup.append("g").attr("class", "sepal-slider");
+    sepalSlider
+      .append("text")
+      .attr("y", -5)
+      .style("font-size", "11px")
+      .style("fill", "#333")
+      .text("Sepal Length");
+
+    sepalSlider
+      .append("line")
+      .attr("x1", 0)
+      .attr("x2", 80)
+      .attr("y1", 8)
+      .attr("y2", 8)
+      .style("stroke", "#ddd")
+      .style("stroke-width", 4);
+
+    const sepalHandles = sepalSlider
+      .selectAll(".sepal-handle")
+      .data([0, 1])
+      .enter()
+      .append("circle")
+      .attr("class", "sepal-handle")
+      .attr("r", 5)
+      .attr("cy", 8)
+      .attr("cx", (d, i) => sepalSliderScale(sepalRange[i]))
+      .style("fill", "#ff6b6b")
+      .style("cursor", "pointer")
+      .call(
+        d3.drag().on("drag", function (event, d) {
+          const newVal = sepalSliderScale.invert(
+            Math.max(0, Math.min(80, event.x))
+          );
+          sepalRange[d] = newVal;
+          if (d === 0 && sepalRange[0] > sepalRange[1])
+            sepalRange[0] = sepalRange[1];
+          if (d === 1 && sepalRange[1] < sepalRange[0])
+            sepalRange[1] = sepalRange[0];
+          d3.select(this).attr("cx", sepalSliderScale(sepalRange[d]));
+
+          isSliderActive = true;
+          createStatsResetButton();
+          updateBars();
+        })
+      );
+
+    // Petal slider
+    const petalSliderScale = d3
+      .scaleLinear()
+      .domain(petalExtent)
+      .range([0, 80]);
+
+    const petalSlider = sliderGroup
+      .append("g")
+      .attr("class", "petal-slider")
+      .attr("transform", "translate(0, 40)");
+
+    petalSlider
+      .append("text")
+      .attr("y", -5)
+      .style("font-size", "11px")
+      .style("fill", "#333")
+      .text("Petal Length");
+
+    petalSlider
+      .append("line")
+      .attr("x1", 0)
+      .attr("x2", 80)
+      .attr("y1", 8)
+      .attr("y2", 8)
+      .style("stroke", "#ddd")
+      .style("stroke-width", 4);
+
+    const petalHandles = petalSlider
+      .selectAll(".petal-handle")
+      .data([0, 1])
+      .enter()
+      .append("circle")
+      .attr("class", "petal-handle")
+      .attr("r", 5)
+      .attr("cy", 8)
+      .attr("cx", (d, i) => petalSliderScale(petalRange[i]))
+      .style("fill", "#2ecc71")
+      .style("cursor", "pointer")
+      .call(
+        d3.drag().on("drag", function (event, d) {
+          const newVal = petalSliderScale.invert(
+            Math.max(0, Math.min(80, event.x))
+          );
+          petalRange[d] = newVal;
+          if (d === 0 && petalRange[0] > petalRange[1])
+            petalRange[0] = petalRange[1];
+          if (d === 1 && petalRange[1] < petalRange[0])
+            petalRange[1] = petalRange[0];
+          d3.select(this).attr("cx", petalSliderScale(petalRange[d]));
+
+          isSliderActive = true;
+          createStatsResetButton();
+          updateBars();
+        })
+      );
+
+    // Reset button function
+    function createStatsResetButton() {
+      if (!isSliderActive) {
+        sliderGroup.select(".stats-reset-btn").remove();
+        return;
+      }
+
+      if (sliderGroup.select(".stats-reset-btn").empty()) {
+        const resetBtn = sliderGroup
+          .append("g")
+          .attr("class", "stats-reset-btn")
+          .attr("transform", "translate(0, 85)")
+          .style("cursor", "pointer")
+          .on("click", resetStatsFilters);
+
+        resetBtn
+          .append("rect")
+          .attr("width", 60)
+          .attr("height", 18)
+          .attr("rx", 3)
+          .style("fill", "#ff6b6b")
+          .style("opacity", 0.8);
+
+        resetBtn
+          .append("text")
+          .attr("x", 30)
+          .attr("y", 12)
+          .attr("text-anchor", "middle")
+          .style("font-size", "10px")
+          .style("fill", "white")
+          .text("Reset Filter");
+      }
+    }
+
+    // Update bars based on filtered data
+    function updateBars() {
+      // Filter data based on slider ranges
+      const filteredData = data.filter(
+        (d) =>
+          d.sepalLength >= sepalRange[0] &&
+          d.sepalLength <= sepalRange[1] &&
+          d.petalLength >= petalRange[0] &&
+          d.petalLength <= petalRange[1]
+      );
+
+      // Calculate new statistics
+      const species = ["setosa", "versicolor", "virginica"];
+      const newSepalStats = species.map((spec) => {
+        const speciesData = filteredData.filter((d) => d.species === spec);
+        return {
+          species: spec,
+          length:
+            speciesData.length > 0
+              ? statType === "mean"
+                ? d3.mean(speciesData, (d) => d.sepalLength)
+                : d3.median(speciesData, (d) => d.sepalLength)
+              : 0,
+          width:
+            speciesData.length > 0
+              ? statType === "mean"
+                ? d3.mean(speciesData, (d) => d.sepalWidth)
+                : d3.median(speciesData, (d) => d.sepalWidth)
+              : 0,
+        };
+      });
+
+      const newPetalStats = species.map((spec) => {
+        const speciesData = filteredData.filter((d) => d.species === spec);
+        return {
+          species: spec,
+          length:
+            speciesData.length > 0
+              ? statType === "mean"
+                ? d3.mean(speciesData, (d) => d.petalLength)
+                : d3.median(speciesData, (d) => d.petalLength)
+              : 0,
+          width:
+            speciesData.length > 0
+              ? statType === "mean"
+                ? d3.mean(speciesData, (d) => d.petalWidth)
+                : d3.median(speciesData, (d) => d.petalWidth)
+              : 0,
+        };
+      });
+
+      // Update sepal bars
+      const sepalChart = g.select(".sepal-chart");
+      const sepalYScale = d3
+        .scaleLinear()
+        .domain([0, d3.max(newSepalStats, (d) => d.length)])
+        .nice()
+        .range([height - 80, 0]);
+
+      sepalChart
+        .select(".y-axis")
+        .transition()
+        .duration(500)
+        .call(d3.axisLeft(sepalYScale));
+
+      sepalChart
+        .selectAll(".sepal-bar")
+        .data(newSepalStats)
+        .transition()
+        .duration(500)
+        .attr("y", (d) => sepalYScale(d.length))
+        .attr("height", (d) => height - 80 - sepalYScale(d.length));
+
+      sepalChart
+        .selectAll(".sepal-label")
+        .data(newSepalStats)
+        .transition()
+        .duration(500)
+        .attr("y", (d) => sepalYScale(d.length) - 5)
+        .text((d) => d.length.toFixed(1));
+
+      // Update petal bars
+      const petalChart = g.select(".petal-chart");
+      const petalYScale = d3
+        .scaleLinear()
+        .domain([0, d3.max(newPetalStats, (d) => d.length)])
+        .nice()
+        .range([height - 80, 0]);
+
+      petalChart
+        .select(".y-axis")
+        .transition()
+        .duration(500)
+        .call(d3.axisLeft(petalYScale));
+
+      petalChart
+        .selectAll(".petal-bar")
+        .data(newPetalStats)
+        .transition()
+        .duration(500)
+        .attr("y", (d) => petalYScale(d.length))
+        .attr("height", (d) => height - 80 - petalYScale(d.length));
+
+      petalChart
+        .selectAll(".petal-label")
+        .data(newPetalStats)
+        .transition()
+        .duration(500)
+        .attr("y", (d) => petalYScale(d.length) - 5)
+        .text((d) => d.length.toFixed(1));
+    }
+
+    // Reset function
+    function resetStatsFilters() {
+      sepalRange = [...sepalExtent];
+      petalRange = [...petalExtent];
+      sepalHandles.attr("cx", (d, i) => sepalSliderScale(sepalRange[i]));
+      petalHandles.attr("cx", (d, i) => petalSliderScale(petalRange[i]));
+
+      isSliderActive = false;
+      createStatsResetButton();
+      updateBars();
     }
   }
 }
